@@ -1,0 +1,14 @@
+{"level":"info","time":"2025-07-22T23:32:40.230+0800","caller":"server/server_http.go:103","msg":"http group registered:","module":"httpServer","path":"/api/test"}
+{"level":"info","time":"2025-07-22T23:32:40.232+0800","caller":"server/server_http.go:126","msg":"http handler registered to group:","module":"httpServer","path":"hello","prefix":"test"}
+{"level":"info","time":"2025-07-22T23:32:40.232+0800","caller":"server/server_http.go:66","msg":"http server listened on:","module":"httpServer","addr":":8080"}
+{"level":"info","time":"2025-07-22T23:32:40.233+0800","caller":"server/server_http.go:69","msg":"http route registered:","module":"httpServer","method":"POST","path":"/api/test/hello"}
+{"level":"info","time":"2025-07-22T23:47:19.943+0800","caller":"server/server_http.go:103","msg":"http group registered:","module":"httpServer","path":"/api/test"}
+{"level":"info","time":"2025-07-22T23:47:19.945+0800","caller":"server/server_http.go:126","msg":"http handler registered to group:","module":"httpServer","path":"hello","prefix":"test"}
+{"level":"info","time":"2025-07-22T23:47:19.946+0800","caller":"server/server_http.go:66","msg":"http server listened on:","module":"httpServer","addr":":8080"}
+{"level":"info","time":"2025-07-22T23:47:19.946+0800","caller":"server/server_http.go:69","msg":"http route registered:","module":"httpServer","method":"POST","path":"/api/test/hello"}
+{"level":"debug","time":"2025-07-22T23:47:27.630+0800","caller":"logs/logger.go:112","msg":"Received request","name":"World"}
+{"level":"info","time":"2025-07-23T09:54:28.990+0800","caller":"server/server_http.go:103","msg":"http group registered:","module":"httpServer","path":"/api/test"}
+{"level":"info","time":"2025-07-23T09:54:28.992+0800","caller":"server/server_http.go:126","msg":"http handler registered to group:","module":"httpServer","path":"hello","prefix":"test"}
+{"level":"info","time":"2025-07-23T09:54:28.993+0800","caller":"server/server_http.go:66","msg":"http server listened on:","module":"httpServer","addr":":8080"}
+{"level":"info","time":"2025-07-23T09:54:28.993+0800","caller":"server/server_http.go:69","msg":"http route registered:","module":"httpServer","method":"POST","path":"/api/test/hello"}
+{"level":"debug","time":"2025-07-23T09:54:34.691+0800","caller":"logs/logger.go:112","msg":"Received request","name":"World"}

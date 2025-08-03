@@ -122,7 +122,7 @@ func Debugf(format string, args ...interface{}) {
 func GetLogger(m string) *zap.Logger {
 	if Log == nil {
 		// 默认配置
-		loggerConf := map[string]interface{}{
+		loggerConf := map[string]any{
 			"filename":   "logs/app.log",
 			"maxsize":    60,
 			"maxbackups": 5,
@@ -130,13 +130,16 @@ func GetLogger(m string) *zap.Logger {
 			"compress":   true,
 			"level":      -1,
 		}
-		level := loggerConf["level"]
+		level, ok := loggerConf["level"]
+		if !ok {
+			panic("Logger configuration does not contain 'level' key")
+		}
 		jsonBytes, err := json.Marshal(loggerConf)
 		if err != nil {
 			// 处理错误
 			panic("Failed to marshal logger configuration: " + err.Error())
 		}
-		Init(jsonBytes, zapcore.Level(level.(int8))) // Initialize with default configuration if not already initialized
+		Init(jsonBytes, zapcore.Level(level.(int))) // Initialize with default configuration if not already initialized
 	}
 	return Log.With(zap.String("module", m))
 }

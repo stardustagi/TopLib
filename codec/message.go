@@ -72,6 +72,13 @@ func NewDefaultMessageHandler() IMessageProcessor {
 
 func (m *DefaultMessageProcessor) HandlerMessage(msg IMessage) (string, error) {
 	result := fmt.Sprintf("you send message %s:", string(msg.GetPayload()))
+	resultMsg := NewJsonMessage("system", "echo", result)
+	bResult, err := (utils.Struct2Bytes(resultMsg)) // Convert the message to bytes for logging
+	if err != nil {
+		logs.Error("Failed to convert message to bytes", logs.ErrorInfo(err))
+		return "", err
+	}
+	result = string(bResult) // Convert bytes back to string for logging
 	logs.Info("message handler", logs.String("result", result))
 	return result, nil
 }

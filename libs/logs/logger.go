@@ -13,16 +13,28 @@ import (
 
 var Log *zap.Logger
 
-func Init(logConfigJson []byte, level zapcore.Level) {
+type LoggerConfig struct {
+	Filename   string `json:"filename" yaml:"filename"`
+	MaxSize    int    `json:"maxsize" yaml:"maxsize"`
+	MaxAge     int    `json:"maxage" yaml:"maxage"`
+	MaxBackups int    `json:"maxbackups" yaml:"maxbackups"`
+	LocalTime  bool   `json:"localtime" yaml:"localtime"`
+	Compress   bool   `json:"compress" yaml:"compress"`
+	Level      int    `json:"level" yaml:"level"`
+	size       int64
+	file       *os.File
+}
+
+func Init(logConfigJson []byte) {
 	// * lumberjack.Logger 用于日志轮转
-	var logConfig *lumberjack.Logger
+	var logConfig LoggerConfig
 	var err error
-	if logConfig, err = utils.Bytes2Struct[*lumberjack.Logger](logConfigJson); err != nil {
+	if logConfig, err = utils.Bytes2Struct[LoggerConfig](logConfigJson); err != nil {
 		panic("Failed to parse log configuration: " + err.Error())
 	}
 	// 日志级别
 	var encoderCfg zapcore.EncoderConfig
-	// level := zapcore.InfoLevel
+	level := zapcore.Level(logConfig.Level)
 	if level < zapcore.DebugLevel || level > zapcore.FatalLevel {
 		level = zapcore.InfoLevel
 	}
@@ -52,7 +64,15 @@ func Init(logConfigJson []byte, level zapcore.Level) {
 		level,
 	))
 	// 文件输出配置
-	fileWriter := zapcore.AddSync(logConfig)
+	fileConfig := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   logConfig.Filename,
+		MaxSize:    logConfig.MaxSize,    // megabytes
+		MaxBackups: logConfig.MaxBackups, // 日志文件保留的最大个数
+		MaxAge:     logConfig.MaxAge,     // days
+		LocalTime:  logConfig.LocalTime,
+		Compress:   logConfig.Compress, // 是否压缩
+	})
+	fileWriter := zapcore.AddSync(fileConfig)
 
 	zapCore = append(zapCore, zapcore.NewCore(
 		encoder,
@@ -130,16 +150,12 @@ func GetLogger(m string) *zap.Logger {
 			"compress":   true,
 			"level":      -1,
 		}
-		level, ok := loggerConf["level"]
-		if !ok {
-			panic("Logger configuration does not contain 'level' key")
-		}
 		jsonBytes, err := json.Marshal(loggerConf)
 		if err != nil {
 			// 处理错误
 			panic("Failed to marshal logger configuration: " + err.Error())
 		}
-		Init(jsonBytes, zapcore.Level(level.(int))) // Initialize with default configuration if not already initialized
+		Init(jsonBytes) // Initialize with default configuration if not already initialized
 	}
 	return Log.With(zap.String("module", m))
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/stardustagi/TopLib/codec"
 	"github.com/stardustagi/TopLib/libs/logs"
 	"github.com/stardustagi/TopLib/libs/option"
-	"go.uber.org/zap/zapcore"
 )
 
 type HelloReq struct {
@@ -37,12 +36,11 @@ func TestNewHttp(t *testing.T) {
 		"compress":   true,
 		"level":      -1,
 	}
-	level := loggerConf["level"]
 	jsonBytes, err := json.Marshal(loggerConf)
 	if err != nil {
 		// 处理错误
 	}
-	logs.Init(jsonBytes, zapcore.Level(level.(int)))
+	logs.Init(jsonBytes)
 	opts := &option.Options{
 		Http: option.Http{
 			Port: 8080,

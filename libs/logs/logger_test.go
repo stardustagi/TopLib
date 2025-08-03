@@ -3,8 +3,6 @@ package logs
 import (
 	"encoding/json"
 	"testing"
-
-	"go.uber.org/zap/zapcore"
 )
 
 func TestLogger(t *testing.T) {
@@ -17,7 +15,7 @@ func TestLogger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to marshal config: %v", err)
 	}
-	Init(conf, zapcore.InfoLevel)
+	Init(conf)
 
 	Log.Info("This is an info message")
 	Log.Warn("This is a warning message")

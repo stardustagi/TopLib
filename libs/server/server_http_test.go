@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"github.com/stardustagi/TopLib/codec"
 	"github.com/stardustagi/TopLib/libs/logs"
 	"github.com/stardustagi/TopLib/libs/option"
 	"go.uber.org/zap/zapcore"
@@ -17,6 +19,12 @@ type HelloReq struct {
 
 type HelloResp struct {
 	Message string `json:"message"`
+}
+
+type WsReq struct {
+}
+
+type WsResp struct {
 }
 
 func TestNewHttp(t *testing.T) {
@@ -55,7 +63,43 @@ func TestNewHttp(t *testing.T) {
 			return ctx.JSON(http.StatusOK, resp)
 		},
 	)
+	manager := NewClientManager(logs.GetLogger("websocketClientManager")) // Initialize the client manager
+	go manager.Start()
+
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	ws := NewHandler(
+		"ws",
+		[]string{"websocket"},
+		func(ctx echo.Context, req WsReq, resp WsResp) error {
+			conn, err := upgrader.Upgrade(ctx.Response(), ctx.Request(), nil)
+			if err != nil {
+				return err
+			}
+			logger := logs.GetLogger("websocketClient")
+			defaultHandlerInterface := codec.NewDefaultMessageHandler()
+			client := NewClient(
+				"testUserId",
+				"testSessionId",
+				conn,
+				codec.NewJsonCodec(),
+				logger,
+				ctx.Request().Context(),
+				defaultHandlerInterface, // Use the default message handler
+				manager,
+			)
+			manager.RegisterClient(client)
+			go client.Listen()
+			return nil
+		},
+	)
 	bk.AddGroup("test")
 	bk.AddPostHandler("test", h)
+	bk.AddGetHandler("test", ws)
 	bk.Start()
 }

@@ -1,0 +1,4 @@
+/.vscode
+*.rest
+libs/server/__debug_bin287080302
+*.log

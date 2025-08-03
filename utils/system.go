@@ -3,8 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"net"
+	"reflect"
 	"strconv"
 	"strings"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // Struct2Bytes converts a struct to a byte slice using JSON encoding.
@@ -15,6 +18,37 @@ func Bytes2Struct[T any](data []byte) (T, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+func Struct2Bytes[T any](data T) (string, error) {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+// Bytes2ProtobufStruct converts protobuf bytes to a struct
+func Bytes2ProtobufStruct[T proto.Message](data []byte) (T, error) {
+	var result T
+	// 创建一个新的实例
+	resultType := reflect.TypeOf(result).Elem()
+	newResult := reflect.New(resultType).Interface().(T)
+
+	err := proto.Unmarshal(data, newResult)
+	if err != nil {
+		return result, err
+	}
+	return newResult, nil
+}
+
+// ProtobufStruct2Bytes converts a protobuf struct to bytes
+func ProtobufStruct2Bytes[T proto.Message](data T) ([]byte, error) {
+	bytes, err := proto.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }
 
 // 检查IP地址格式是否正确

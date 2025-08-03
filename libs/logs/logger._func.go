@@ -18,7 +18,7 @@ func Int32(k string, v int32) zap.Field {
 	return zap.Int32(k, v)
 }
 
-func ErrorInfo(k string, v error) zap.Field {
+func ErrorInfo(v error) zap.Field {
 	if v == nil {
 		return zap.Skip()
 	}

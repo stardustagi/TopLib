@@ -9,6 +9,7 @@ import (
 
 	"github.com/stardustagi/TopLib/codec"
 	"github.com/stardustagi/TopLib/libs/logs"
+	"github.com/stardustagi/TopLib/protocol"
 )
 
 func TestClient(t *testing.T) {
@@ -19,7 +20,7 @@ func TestClient(t *testing.T) {
 	}
 	logger := logs.GetLogger("wsclient")
 	newCodec := codec.NewJsonCodec()
-	newHandler := codec.NewDefaultMessageHandler()
+	newHandler := protocol.NewDefaultMessageHandler()
 	// 创建客户端
 	client, err := NewWSClient(serverURL, headers, newCodec, newHandler, logger)
 	if err != nil {

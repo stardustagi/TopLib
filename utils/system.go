@@ -52,7 +52,7 @@ func ProtobufStruct2Bytes[T proto.Message](data T) ([]byte, error) {
 }
 
 // 检查IP地址格式是否正确
-func checkIp(ipStr string) bool {
+func CheckIp(ipStr string) bool {
 	address := net.ParseIP(ipStr)
 	if address == nil {
 		// fmt.Println("ip地址格式不正确")
@@ -83,7 +83,7 @@ func NetAton(ipStr string) int64 {
 }
 
 func IsInnerIp(ipStr string) bool {
-	if !checkIp(ipStr) {
+	if !CheckIp(ipStr) {
 		return false
 	}
 	inputIpNum := NetAton(ipStr)

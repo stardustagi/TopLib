@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/stardustagi/TopLib/codec"
 	"github.com/stardustagi/TopLib/libs/logs"
+	"github.com/stardustagi/TopLib/protocol"
 	"go.uber.org/zap"
 )
 
@@ -27,14 +28,14 @@ type Client struct {
 	codec     codec.ICodec    // 编解码器
 	logger    *zap.Logger
 	ctx       context.Context
-	handler   codec.IMessageProcessor
+	handler   protocol.IMessageProcessor
 	userId    string // 用户ID,方便根据用户ID获取客户端
 	send      chan []byte
 	closed    chan struct{}  // 用于关闭连接的通道
 	cm        IClientManager // 客户端管理器接口
 }
 
-func NewClient(userId, sessionId string, conn *websocket.Conn, codec codec.ICodec, logger *zap.Logger, ctx context.Context, handlerInterface codec.IMessageProcessor, cm IClientManager) IClient {
+func NewClient(userId, sessionId string, conn *websocket.Conn, codec codec.ICodec, logger *zap.Logger, ctx context.Context, handlerInterface protocol.IMessageProcessor, cm IClientManager) IClient {
 	return &Client{
 		sessionId: sessionId,
 		logger:    logger,

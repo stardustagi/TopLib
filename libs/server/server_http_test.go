@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stardustagi/TopLib/codec"
 	"github.com/stardustagi/TopLib/libs/logs"
-	"github.com/stardustagi/TopLib/libs/option"
+	"github.com/stardustagi/TopLib/protocol"
 )
 
 type HelloReq struct {
@@ -41,13 +41,18 @@ func TestNewHttp(t *testing.T) {
 		// 处理错误
 	}
 	logs.Init(jsonBytes)
-	opts := &option.Options{
-		Http: option.Http{
-			Port: 8080,
-			Path: "/",
-		},
-	}
 
+	httpServerConfig := map[string]interface{}{
+		"port":          8080,
+		"path":          "/api",
+		"cors":          true,
+		"access":        true,
+		"request_log":   true,
+		"address":       "127.0.0.1",
+		"read_timeout":  60,
+		"write_timeout": 60,
+	}
+	opts, err := json.Marshal(httpServerConfig)
 	bk, err := NewBackend(opts)
 	if err != nil {
 		t.Fatal("failed to create backend:", err)
@@ -80,7 +85,7 @@ func TestNewHttp(t *testing.T) {
 				return err
 			}
 			logger := logs.GetLogger("websocketClient")
-			defaultHandlerInterface := codec.NewDefaultMessageHandler()
+			defaultHandlerInterface := protocol.NewDefaultMessageHandler()
 			client := NewClient(
 				"testUserId",
 				"testSessionId",

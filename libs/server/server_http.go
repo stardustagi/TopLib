@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/stardustagi/TopLib/libs/logs"
-	"github.com/stardustagi/TopLib/libs/option"
+	"github.com/stardustagi/TopLib/utils"
 	"go.uber.org/zap"
 )
 
@@ -23,22 +23,26 @@ type HttpServer struct {
 	group  map[string]*StarDustGroup
 }
 
-func NewHttpServer(opts *option.Options) (*HttpServer, error) {
+func NewHttpServer(configByte []byte) (*HttpServer, error) {
 	engine := echo.New()
+	config, err := utils.Bytes2Struct[HttpServerConfig](configByte)
+	if err != nil {
+		panic("Failed to parse HTTP server configuration: " + err.Error())
+	}
 	engine.Validator = &CustomValidator{Validator: validator.New()}
 	engine.Use()
-	addr := fmt.Sprintf("%s:%d", opts.Http.Address, opts.Http.Port)
-	if opts.Http.Cors {
+	addr := fmt.Sprintf("%s:%d", config.Address, config.Port)
+	if config.Cors {
 		engine.Use(Cors())
 	}
-	if opts.Http.RequestLog {
+	if config.RequestLog {
 		engine.Use(Request())
 	}
-	if opts.Http.Access {
+	if config.Access {
 		engine.Use(Access())
 	}
 
-	if opts.Http.Path != "" && opts.Http.Path[0] != '/' {
+	if config.Path != "" && config.Path[0] != '/' {
 		return nil, errors.New("the http.path must start with a /")
 	}
 
@@ -48,7 +52,7 @@ func NewHttpServer(opts *option.Options) (*HttpServer, error) {
 		engine: engine,
 		group:  make(map[string]*StarDustGroup),
 		addr:   addr,
-		path:   opts.Http.Path,
+		path:   config.Path,
 	}
 	return srv, nil
 }

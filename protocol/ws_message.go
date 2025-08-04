@@ -1,10 +1,11 @@
-package codec
+package protocol
 
 import (
 	"fmt"
 
 	"github.com/stardustagi/TopLib/libs/logs"
 	"github.com/stardustagi/TopLib/utils"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -63,7 +64,10 @@ type IMessageProcessor interface {
 	HandlerMessage(msg IMessage) (string, error)
 }
 
+// DefaultMessageProcessor 默认消息处理器
 type DefaultMessageProcessor struct {
+	logger  *zap.Logger
+	mainCmd string
 }
 
 func NewDefaultMessageHandler() IMessageProcessor {

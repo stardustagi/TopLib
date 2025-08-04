@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/stardustagi/TopLib/codec"
 	"github.com/stardustagi/TopLib/libs/logs"
+	"github.com/stardustagi/TopLib/protocol"
 	"github.com/stardustagi/TopLib/utils"
 	"go.uber.org/zap"
 )
@@ -23,10 +24,10 @@ type WSClient struct {
 	done     chan struct{}
 	ctx      context.Context
 	cancel   context.CancelFunc
-	handler  codec.IMessageProcessor
+	handler  protocol.IMessageProcessor
 }
 
-func NewWSClient(serverURL string, headers map[string]string, pcodec codec.ICodec, msgHandler codec.IMessageProcessor, logger *zap.Logger) (*WSClient, error) {
+func NewWSClient(serverURL string, headers map[string]string, pcodec codec.ICodec, msgHandler protocol.IMessageProcessor, logger *zap.Logger) (*WSClient, error) {
 	u, err := url.Parse(serverURL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid URL: %v", err)
@@ -156,7 +157,7 @@ func (c *WSClient) pingPump() {
 
 // handleMessage 处理接收到的消息
 func (c *WSClient) handleMessage(data []byte) {
-	msg, err := utils.Bytes2Struct[codec.Message](data)
+	msg, err := utils.Bytes2Struct[protocol.Message](data)
 	if err != nil {
 		c.logger.Error("decode message error", zap.Error(err))
 		return
@@ -174,7 +175,7 @@ func (c *WSClient) handleMessage(data []byte) {
 
 // SendMessage 发送消息
 func (c *WSClient) SendMessage(main, sub, payload string) error {
-	msg := codec.Message{
+	msg := protocol.Message{
 		Main:    main,
 		Sub:     sub,
 		Payload: payload,

@@ -1,6 +1,10 @@
 package logs
 
-import "go.uber.org/zap"
+import (
+	"time"
+
+	"go.uber.org/zap"
+)
 
 func String(k, v string) zap.Field {
 	return zap.String(k, v)
@@ -23,4 +27,8 @@ func ErrorInfo(v error) zap.Field {
 		return zap.Skip()
 	}
 	return zap.Error(v)
+}
+
+func Duration(k string, v time.Duration) zap.Field {
+	return zap.Duration(k, v)
 }

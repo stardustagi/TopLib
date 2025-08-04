@@ -4,25 +4,28 @@ import (
 	"context"
 
 	"github.com/stardustagi/TopLib/libs/logs"
-	"github.com/stardustagi/TopLib/libs/option"
+	"github.com/stardustagi/TopLib/utils"
 	"go.uber.org/zap"
 )
 
 type Backend struct {
-	opts       *option.Options
+	config     HttpServerConfig
 	Ctx        context.Context
 	Logger     *zap.Logger
 	httpServer *HttpServer
-	handles    []IHandlers
 }
 
-func NewBackend(opts *option.Options) (*Backend, error) {
-	httpServer, err := NewHttpServer(opts)
+func NewBackend(config []byte) (*Backend, error) {
+	httpServer, err := NewHttpServer(config)
 	if err != nil {
 		return nil, err
 	}
+	configStruct, err := utils.Bytes2Struct[HttpServerConfig](config)
+	if err != nil {
+		panic("Failed to parse HTTP server configuration: " + err.Error())
+	}
 	return &Backend{
-		opts:       opts,
+		config:     configStruct,
 		Ctx:        context.Background(),
 		Logger:     logs.GetLogger("http_backend"),
 		httpServer: httpServer,
@@ -41,6 +44,14 @@ func (m *Backend) AddGetHandler(group string, h IHandler) {
 	m.httpServer.Get(h.GetName(), group, h)
 }
 
+func (m *Backend) AddHandler(method, path string, h IHandler) {
+	m.httpServer.Handle(method, path, h)
+}
+
 func (m *Backend) Start() error {
 	return m.httpServer.Startup()
+}
+
+func (m *Backend) Stop() {
+	m.httpServer.Stop()
 }

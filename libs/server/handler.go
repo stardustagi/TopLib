@@ -4,6 +4,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// 定义handler参数的结构
+type HandlerParams struct {
+	Name    string
+	Tags    []string
+	Handler interface{}
+}
+
 type Handler[Req any, Resp any] struct {
 	Path string // 路径
 	Name string

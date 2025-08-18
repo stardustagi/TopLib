@@ -2,6 +2,7 @@ package databases
 
 import (
 	"errors"
+
 	"github.com/go-xorm/xorm"
 	"github.com/go-xorm/xorm/migrate"
 )
@@ -15,6 +16,11 @@ type Dao interface {
 
 	Update(bean interface{}, where ...interface{}) (int64, error)
 	UpdateById(id interface{}, bean interface{}) (int64, error)
+
+	// 新增的 Upsert 方法
+	Upsert(bean interface{}) (int64, error)
+	UpsertById(id interface{}, bean interface{}) (int64, error)
+	UpsertMany(beans ...interface{}) (int64, error)
 
 	Delete(bean interface{}) (int64, error)
 	DeleteById(id interface{}, bean interface{}) (int64, error)
@@ -110,6 +116,55 @@ func (m *OrmBaseDao) UpdateById(id interface{}, bean interface{}) (int64, error)
 		return m.session.ID(id).Update(bean)
 	}
 	return m.conn.ID(id).Update(bean)
+}
+
+// Upsert 如果数据存在则更新，不存在则插入
+func (m *OrmBaseDao) Upsert(bean interface{}) (int64, error) {
+	// 检查数据是否存在
+	exists, err := m.Exists(bean)
+	if err != nil {
+		return 0, err
+	}
+
+	if exists {
+		// 数据存在，执行更新
+		return m.Update(bean)
+	} else {
+		// 数据不存在，执行插入
+		return m.InsertOne(bean)
+	}
+}
+
+// UpsertById 根据ID进行Upsert操作
+func (m *OrmBaseDao) UpsertById(id interface{}, bean interface{}) (int64, error) {
+	// 检查指定ID的数据是否存在
+	found, err := m.FindById(id, bean)
+	if err != nil {
+		return 0, err
+	}
+
+	if found {
+		// 数据存在，执行更新
+		return m.UpdateById(id, bean)
+	} else {
+		// 数据不存在，执行插入
+		return m.InsertOne(bean)
+	}
+}
+
+// UpsertMany 批量Upsert操作
+func (m *OrmBaseDao) UpsertMany(beans ...interface{}) (int64, error) {
+	var totalAffected int64 = 0
+
+	for _, bean := range beans {
+		affected, err := m.Upsert(bean)
+		if err != nil {
+			return totalAffected, err
+		}
+		totalAffected += affected
+	}
+
+	return totalAffected, nil
 }
 
 func (m *OrmBaseDao) Delete(bean interface{}) (int64, error) {

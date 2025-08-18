@@ -21,8 +21,8 @@ func Access() echo.MiddlewareFunc {
 			jwtstr := c.Request().Header.Get("jwt")
 
 			if jwtstr != "" {
-				jwtobj, err := jwt.JWTDecrypt(jwtstr)
-				if !err || jwtobj == nil || jwtobj["token"] == nil || jwtobj["id"] == nil {
+				jwtobj, ok := jwt.JWTDecrypt(jwtstr)
+				if !ok || jwtobj == nil || jwtobj["token"] == nil || jwtobj["id"] == nil {
 					return c.JSON(401, map[string]interface{}{
 						"errcode": 2,
 						"errmsg":  "jwt解析错误",

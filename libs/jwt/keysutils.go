@@ -23,3 +23,8 @@ func UserTokenKey(id string) string {
 	logs.Info("user token", zap.String("id", id))
 	return fmt.Sprintf("%s:user:token:%s", appName, id)
 }
+
+func NodeTokenKey(id string) string {
+	logs.Info("node token", zap.String("id", id))
+	return fmt.Sprintf("%s:node:token:%s", appName, id)
+}

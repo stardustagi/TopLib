@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	"github.com/labstack/echo/v4"
 	"github.com/stardustagi/TopLib/libs/logs"
 	"github.com/stardustagi/TopLib/utils"
 	"go.uber.org/zap"
@@ -32,8 +33,8 @@ func NewBackend(config []byte) (*Backend, error) {
 	}, nil
 }
 
-func (m *Backend) AddGroup(grop string) {
-	m.httpServer.AddGroup(grop)
+func (m *Backend) AddGroup(group string, middleware ...echo.MiddlewareFunc) {
+	m.httpServer.AddGroup(group, middleware...)
 }
 
 func (m *Backend) AddPostHandler(group string, h IHandler) {

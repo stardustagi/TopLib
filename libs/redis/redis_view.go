@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/hashicorp/go-hclog"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 var ErrorInputValuesIsNil = errors.New("input values is nil")
@@ -21,18 +21,15 @@ type redisView struct {
 	prefix string
 	cmd    RedisCmd
 	pubSub redis.PubSub // nolint:unsed
-	logger hclog.Logger
+	logger *zap.Logger
 }
 
 func (r *redisView) XAdd(ctx context.Context, a redis.XAddArgs) *redis.StringCmd {
 	return r.cmd.XAdd(ctx, &a)
 }
 
-func NewRedisView(cmd RedisCmd, prefix string, logger hclog.Logger) RedisCli {
-	view := &redisView{cmd: cmd, prefix: prefix}
-	if logger != nil {
-		view.logger = logger.Named("redis")
-	}
+func NewRedisView(cmd RedisCmd, prefix string, logger *zap.Logger) RedisCli {
+	view := &redisView{cmd: cmd, prefix: prefix, logger: logger}
 	return view
 }
 
@@ -63,8 +60,9 @@ func (r *redisView) Scan(ctx context.Context, cursor uint64, match string, count
 }
 
 func (r *redisView) Get(ctx context.Context, key string) ([]byte, error) {
-	if r.logger != nil && r.logger.IsTrace() {
-		r.logger.Trace("get", "key", r.expandKey(key))
+	if r.logger != nil {
+		r.logger.Debug("Redis GET operation",
+			zap.String("key", r.expandKey(key)))
 	}
 	result, err := r.cmd.Get(ctx, r.expandKey(key)).Result()
 	if nil != err {
@@ -74,8 +72,11 @@ func (r *redisView) Get(ctx context.Context, key string) ([]byte, error) {
 }
 
 func (r *redisView) Set(ctx context.Context, key string, value []byte, duration string) error {
-	if r.logger != nil && r.logger.IsTrace() {
-		r.logger.Trace("set", "key", r.expandKey(key), "value", string(value))
+	if r.logger != nil {
+		r.logger.Debug("Redis SET operation",
+			zap.String("key", r.expandKey(key)),
+			zap.String("value", string(value)),
+			zap.String("duration", duration))
 	}
 
 	if duration != "" {

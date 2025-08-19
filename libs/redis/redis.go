@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+
 	"github.com/redis/go-redis/v9"
 )
 
@@ -85,6 +86,7 @@ type RedisCli interface {
 
 	Subscribe(ctx context.Context, channels ...string) (*redis.PubSub, error)
 	PSubscribe(ctx context.Context, channels ...string) (*redis.PubSub, error)
+	Publish(ctx context.Context, channel string, message interface{}) (int64, error)
 
 	NativeCmd() RedisCmd
 	XAdd(ctx context.Context, a redis.XAddArgs) *redis.StringCmd

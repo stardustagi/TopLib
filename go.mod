@@ -10,7 +10,6 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-xorm/xorm v0.7.9
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/go-hclog v1.6.3
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
@@ -21,7 +20,11 @@ require (
 	xorm.io/core v0.7.3
 )
 
-require github.com/google/go-cmp v0.6.0 // indirect
+require (
+	github.com/alicebob/miniredis/v2 v2.35.0 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/yuin/gopher-lua v1.1.1 // indirect
+)
 
 require (
 	cloud.google.com/go v0.117.0 // indirect
@@ -29,12 +32,10 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/fatih/color v1.13.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gorilla/websocket v1.5.3
-	github.com/jessevdk/go-flags v1.6.1
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

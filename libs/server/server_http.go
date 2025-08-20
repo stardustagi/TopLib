@@ -23,6 +23,11 @@ type HttpServer struct {
 	group  map[string]*StarDustGroup
 }
 
+// @title StarDust HTTP Server
+// @version 1.0
+// @description This is the HTTP server for StarDust backend.
+// @host localhost:8080
+// @BasePath /api
 func NewHttpServer(configByte []byte) (*HttpServer, error) {
 	engine := echo.New()
 	config, err := utils.Bytes2Struct[HttpServerConfig](configByte)
@@ -131,4 +136,10 @@ func (m *HttpServer) Post(path string, group string, handler IHandler) {
 		return
 	}
 	m.Handle(http.MethodPost, path, handler)
+}
+
+func (m *HttpServer) AddNativeHandler(method string, path string, handler echo.HandlerFunc) {
+	path, _ = url.JoinPath(m.path, "api", path)
+	m.engine.Add(method, path, handler)
+	m.logger.Info("http native handler registered:", logs.String("method", method), logs.String("path", path))
 }

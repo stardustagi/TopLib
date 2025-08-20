@@ -49,6 +49,10 @@ func (m *Backend) AddHandler(method, path string, h IHandler) {
 	m.httpServer.Handle(method, path, h)
 }
 
+func (m *Backend) AddNativeHandler(method string, path string, handler echo.HandlerFunc) {
+	m.httpServer.AddNativeHandler(method, path, handler)
+}
+
 func (m *Backend) Start() error {
 	return m.httpServer.Startup()
 }

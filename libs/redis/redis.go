@@ -31,6 +31,7 @@ type RedisCli interface {
 	HKeys(ctx context.Context, key string) ([]string, error)
 	HValues(ctx context.Context, key string) ([][]byte, error)
 	HExists(ctx context.Context, key, field string) (bool, error)
+	Exists(ctx context.Context, key string) (bool, error)
 	LRem(ctx context.Context, key string, count int64, value []byte) (int64, error)
 	LIndex(ctx context.Context, key string, index int64) ([]byte, error)
 	LTrim(ctx context.Context, key string, start, stop int64) error

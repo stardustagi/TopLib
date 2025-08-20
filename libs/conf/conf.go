@@ -27,15 +27,15 @@ func Init() {
 	// 设置配置的全局变量
 	appName, ok := globalInfo["app_name"].(string)
 	if !ok {
-		appName = "logistics"
+		panic("app name is missing in the global configuration")
 	}
 	appVersion, ok := globalInfo["app_version"].(string)
 	if !ok {
-		appVersion = "1.0.0"
+		panic("app version is missing in the global configuration")
 	}
 	redisKeyPrefix, ok := globalInfo["redis_key_prefix"].(string)
 	if !ok {
-		redisKeyPrefix = "logistics"
+		panic("redis key prefix is missing in the global configuration")
 	}
 
 	os.Setenv("APP_NAME", appName)

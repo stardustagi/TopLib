@@ -20,7 +20,7 @@ var _ RedisCli = (*redisView)(nil)
 type redisView struct {
 	prefix string
 	cmd    RedisCmd
-	pubSub redis.PubSub // nolint:unsed
+	pubSub redis.PubSub // nolint:unused
 	logger *zap.Logger
 }
 
@@ -105,4 +105,12 @@ func (r *redisView) Expire(ctx context.Context, key string, duration string) err
 	return wrapResult(func() (interface{}, error) {
 		return r.cmd.Expire(ctx, r.expandKey(key), timeout).Result()
 	})
+}
+
+func (r *redisView) Exists(ctx context.Context, key string) (bool, error) {
+	count, err := r.cmd.Exists(ctx, r.expandKey(key)).Result()
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

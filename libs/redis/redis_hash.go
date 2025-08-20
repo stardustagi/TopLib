@@ -77,7 +77,3 @@ func (r *redisView) HValues(ctx context.Context, key string) ([][]byte, error) {
 func (r *redisView) HExists(ctx context.Context, key, field string) (bool, error) {
 	return r.cmd.HExists(ctx, r.expandKey(key), field).Result()
 }
-
-func (r *redisView) Exists(ctx context.Context, key string) (int64, error) {
-	return r.cmd.Exists(ctx, r.expandKey(key)).Result()
-}

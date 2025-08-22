@@ -6,12 +6,12 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func JWTDecrypt(tokenString string) (jwt.MapClaims, bool) {
+func JWTDecrypt(tokenString, secret string) (jwt.MapClaims, bool) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
-		secret := fmt.Sprintf("%s-%s", appName, appVersion)
+		// secret := fmt.Sprintf("%s-%s", appName, appVersion)
 		return []byte(secret), nil
 	})
 	if err != nil {

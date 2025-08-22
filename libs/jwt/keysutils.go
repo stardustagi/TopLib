@@ -24,7 +24,15 @@ func UserTokenKey(id string) string {
 	return fmt.Sprintf("%s:user:token:%s", appName, id)
 }
 
-func NodeTokenKey(id string) string {
+func NodeUserTokenKey(id string) string {
 	logs.Info("node token", zap.String("id", id))
 	return fmt.Sprintf("%s:node:token:%s", appName, id)
+}
+
+func NodeAccesslKey(nodeId string) string {
+	return fmt.Sprintf("%s:node:access:%s", appName, nodeId)
+}
+
+func NodeModeKey(nodeId string) string {
+	return fmt.Sprintf("%s:node:mode:%s", appName, nodeId)
 }

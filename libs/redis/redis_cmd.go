@@ -44,7 +44,7 @@ func Init(redisConf []byte) (RedisCmd, error) {
 		return nil, ErrRedisAddrsEmpty
 	}
 	if c.UseCluster {
-		return redis.NewClusterClient(&redis.ClusterOptions{
+		redisCon = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:        c.Addrs,
 			ReadOnly:     c.ReadOnly,
 			Password:     c.Password,
@@ -54,7 +54,7 @@ func Init(redisConf []byte) (RedisCmd, error) {
 			PoolSize:     c.PoolSize,
 			PoolTimeout:  c.PoolTimeout,
 			TLSConfig:    c.TLSConfig,
-		}), nil
+		})
 	}
 	redisCon = redis.NewClient(&redis.Options{
 		Addr:         c.Addrs[0],

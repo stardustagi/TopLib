@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/stardustagi/TopLib/libs/jwt"
@@ -21,7 +22,10 @@ func Access() echo.MiddlewareFunc {
 			jwtstr := c.Request().Header.Get("jwt")
 
 			if jwtstr != "" {
-				jwtobj, ok := jwt.JWTDecrypt(jwtstr)
+				appName := os.Getenv("APP_NAME")
+				appVersion := os.Getenv("APP_VERSION")
+				secret := fmt.Sprintf("%s-%s", appName, appVersion)
+				jwtobj, ok := jwt.JWTDecrypt(jwtstr, secret)
 				if !ok || jwtobj == nil || jwtobj["token"] == nil || jwtobj["id"] == nil {
 					return c.JSON(401, map[string]interface{}{
 						"errcode": 2,

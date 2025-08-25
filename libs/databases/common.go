@@ -1,7 +1,7 @@
 package databases
 
 import (
-	"github.com/go-xorm/xorm"
+	"xorm.io/xorm"
 )
 
 func DoGet(call func() (bool, error)) error {

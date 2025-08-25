@@ -9,9 +9,9 @@ import (
 	"github.com/stardustagi/TopLib/utils"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 	"xorm.io/core"
+	"xorm.io/xorm"
 )
 
 // DBInterface 数据库接口

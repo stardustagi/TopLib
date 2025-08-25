@@ -3,8 +3,8 @@ package databases
 import (
 	"errors"
 
-	"github.com/go-xorm/xorm"
-	"github.com/go-xorm/xorm/migrate"
+	"xorm.io/xorm"
+	"xorm.io/xorm/migrate"
 )
 
 type Dao interface {

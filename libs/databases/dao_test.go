@@ -16,7 +16,7 @@ func TestEntityNew_Create(t *testing.T) {
 	//logger := hclog.Default()
 	c := Config{
 		ShowSql: true,
-		Master:  "root:123456@tcp(127.0.0.1)/virtual_coin?charset=utf8mb4&parseTime=true&loc=Local",
+		Master:  "root:123456@tcp(127.0.0.1)/csv?charset=utf8mb4&parseTime=true&loc=Local",
 	}
 	// Marshal Config to JSON if Init expects []byte
 	configBytes, err := json.Marshal(c)

@@ -9,11 +9,11 @@ import (
 
 func TestEntity_Create(t *testing.T) {
 	config := map[string]interface{}{
-		"host":   "127.0.0.1",
-		"port":   3306,
-		"user":   "root",
-		"passwd": "123456",
-		"dbname": "csv",
+		"Host":   "127.0.0.1",
+		"Port":   3306,
+		"User":   "root",
+		"Passwd": "123456",
+		"Dbname": "csv",
 	}
 
 	tmpl := `{{.User}}:{{.Passwd}}@tcp({{.Host}}:{{.Port}})/{{.Dbname}}?charset=utf8mb4&parseTime=true&loc=Local`

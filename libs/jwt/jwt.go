@@ -11,7 +11,7 @@ func JWTDecrypt(tokenString, secret string) (jwt.MapClaims, bool) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
-		// secret := fmt.Sprintf("%s-%s", appName, appVersion)
+		secret := fmt.Sprintf("%s-%s", appName, appVersion)
 		return []byte(secret), nil
 	})
 	if err != nil {

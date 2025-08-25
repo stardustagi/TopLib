@@ -1,7 +1,7 @@
 package databases
 
 import (
-	"github.com/go-xorm/xorm"
+	"xorm.io/xorm"
 )
 
 func CheckWhereInfo[T any](w string, v *T, tp string, sess *xorm.Session) {

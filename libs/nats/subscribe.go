@@ -1,12 +1,17 @@
 package nats
 
 import (
+	"encoding/json"
+	"sync"
 	"time"
 
 	"github.com/nats-io/nats.go"
 	"github.com/stardustagi/TopLib/libs/logs"
 	"go.uber.org/zap"
 )
+
+type Subscription = nats.Subscription
+type Msg = nats.Msg
 
 type NatsConnection struct {
 	conn       *nats.Conn
@@ -16,6 +21,52 @@ type NatsConnection struct {
 	useStream  bool
 	logger     *zap.Logger
 	url        string
+}
+
+// NatsConfig NATS配置结构体
+type NatsConfig struct {
+	PublisherName string   `json:"publisher_name"`
+	ConsumerName  string   `json:"consumer_name"`
+	Url           string   `json:"url"`
+	UseStream     bool     `json:"use_stream"`
+	Type          string   `json:"type"`
+	Subject       []string `json:"subject"`
+}
+
+var (
+	instance   *NatsConnection
+	natsConfig *NatsConfig
+	once       sync.Once
+)
+
+func GetNatsInstance() *NatsConnection {
+	once.Do(func() {
+		var err error
+		name := ""
+		switch natsConfig.Type {
+		case "publisher":
+			name = natsConfig.PublisherName
+		case "consumer":
+			name = natsConfig.ConsumerName
+		default:
+			name = natsConfig.PublisherName
+		}
+		instance, err = NewNatsConnect(name, natsConfig.Url, natsConfig.UseStream)
+		if err != nil {
+			instance = nil
+		}
+	})
+	return instance
+}
+
+func Init(config map[string]interface{}) {
+	b, err := json.Marshal(config)
+	if err != nil {
+		panic(err)
+	}
+	if err := json.Unmarshal(b, &natsConfig); err != nil {
+		panic(err)
+	}
 }
 
 func NewNatsConnect(name, url string, useStream bool) (*NatsConnection, error) {

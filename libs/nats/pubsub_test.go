@@ -23,26 +23,53 @@ var (
 )
 
 func TestPubsub(t *testing.T) {
-	url := nats.DefaultURL
-
-	// Initialize NatsConnection
-	var mq *NatsConnection
-	var err error
-	if mq, err = NewNatsConnect(url, true); err != nil {
-		t.Error(err)
-		defer mq.Close()
+	configMap := map[string]interface{}{
+		"publisher_name": "publisher_worker",
+		"consumer_name":  "consumer_worker",
+		"url":            "nats://localhost:4222",
+		"use_stream":     true,
+		"type":           "publisher",
+		"subject":        []string{"billing.*"},
 	}
-
+	// Initialize NatsConnection
+	Init(configMap)
+	natsInstance := GetNatsInstance()
+	err := natsInstance.AddStream("billing", []string{"billing.*"})
+	if err != nil {
+		t.Errorf("Failed to add stream: %v", err)
+		panic(err)
+	}
 	// Publish a message
 	message := []byte("\"{\\\"publisherId\\\":\\\"91\\\",\\\"eventId\\\":\\\"nil\\\",\\\"userId\\\":\\\"1184241832\\\",\\\"firstName\\\":\\\"Snake ??\\\",\\\"lastName\\\":\\\"LN1184241832\\\",\\\"userName\\\":\\\"sd_hong\\\",\\\"timeStamp\\\":\\\"1731590619.434\\\",\\\"signature\\\":\\\"\\\",\\\"language\\\":\\\"ko\\\",\\\"channel\\\":\\\"TG\\\",\\\"version\\\":\\\"3.0.0\\\",\\\"fromType\\\":\\\"script\\\",\\\"traceId\\\":\\\"1731506981989-913fa511-f776-4ea7-ac00-b45f49f30297\\\",\\\"requestType\\\":\\\"getAd\\\",\\\"ip_address\\\":\\\"210.181.107.48\\\",\\\"location\\\":\\\"aHR0cHM6Ly9yZXN0YXVyYW50LXYyLnBpZ2d5cGlnZ3kuaW8vYnIvaW5kZXguaHRtbA==\\\",\\\"platform\\\":\\\"MAC\\\",\\\"zoneId\\\":\\\"137\\\"}\"")
-	mq.Publish("ad_info.clickinfo", message)
+	err = natsInstance.Publish("billing.clickinfo", message)
+	if err != nil {
+		t.Errorf("Failed to publish message: %v", err)
+	}
 
-	// Keep the program running to allow time for message processing
 	time.Sleep(2 * time.Second)
-
 }
 
-func handler(msg *nats.Msg) error {
-	msgChan <- msg
-	return nil
+func TestSubscribe(t *testing.T) {
+	configMap := map[string]interface{}{
+		"publisher_name": "publisher_worker",
+		"consumer_name":  "consumer_worker",
+		"url":            "nats://localhost:4222",
+		"use_stream":     true,
+		"type":           "consumer",
+		"subject":        []string{"billing.*"},
+	}
+	// 初始化 NatsConnection
+	Init(configMap)
+	natsInstance := GetNatsInstance()
+	// 订阅主题
+	_, err := natsInstance.conn.Subscribe("billing.clickinfo", func(msg *nats.Msg) {
+		t.Logf("收到消息: %s", string(msg.Data))
+	})
+	if err != nil {
+		t.Errorf("订阅失败: %v", err)
+		return
+	}
+	// 等待消息到达
+	t.Log("等待消息...")
+	time.Sleep(30 * time.Second)
 }

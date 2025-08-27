@@ -31,11 +31,13 @@ func Request() echo.MiddlewareFunc {
 			if err != nil {
 				requestBody = "failed to request body"
 			} else {
-				// requestBody = string(b)
 				var jsonData interface{}
-				if formatted, err := json.MarshalIndent(jsonData, "", "  "); err != nil {
+				if err := json.Unmarshal(b, &jsonData); err != nil {
+					// 不是有效的 JSON，原样输出
 					requestBody = string(b)
 				} else {
+					// 格式化为标准 JSON 字符串
+					formatted, _ := json.MarshalIndent(jsonData, "", "  ")
 					requestBody = string(formatted)
 				}
 				c.Request().Body = io.NopCloser(bytes.NewBuffer(b))

@@ -6,7 +6,7 @@ import (
 
 func (s *NatsConnection) Publish(subject string, data []byte) error {
 	if s.useStream {
-		_, err := nc.js.Publish(subject, data)
+		_, err := s.js.Publish(subject, data)
 		if err != nil {
 			s.logger.Error("Failed to publish message with JetStream",
 				logs.String("subject", subject),

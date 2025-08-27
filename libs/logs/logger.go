@@ -3,6 +3,7 @@ package logs
 import (
 	"encoding/json"
 	"os"
+	"strings"
 
 	"github.com/stardustagi/TopLib/utils"
 
@@ -25,6 +26,16 @@ type LoggerConfig struct {
 	file       *os.File
 }
 
+func JSONStacktraceEncoder(stacktrace string, enc zapcore.PrimitiveArrayEncoder) {
+	lines := strings.Split(stacktrace, "\n")
+	// 移除最后的空行
+	if len(lines) > 0 && lines[len(lines)-1] == "" {
+		lines = lines[:len(lines)-1]
+	}
+	b, _ := json.Marshal(lines)
+	enc.AppendString(string(b))
+}
+
 func Init(logConfigJson []byte) {
 	// * lumberjack.Logger 用于日志轮转
 	var logConfig LoggerConfig
@@ -41,12 +52,12 @@ func Init(logConfigJson []byte) {
 
 	// 编码器配置
 	encoderCfg = zapcore.EncoderConfig{
-		TimeKey:        "time",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
+		TimeKey:    "time",
+		LevelKey:   "level",
+		NameKey:    "logger",
+		CallerKey:  "caller",
+		MessageKey: "msg",
+		//StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
 		EncodeTime:     zapcore.ISO8601TimeEncoder,

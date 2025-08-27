@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -30,7 +31,13 @@ func Request() echo.MiddlewareFunc {
 			if err != nil {
 				requestBody = "failed to request body"
 			} else {
-				requestBody = string(b)
+				// requestBody = string(b)
+				var jsonData interface{}
+				if formatted, err := json.MarshalIndent(jsonData, "", "  "); err != nil {
+					requestBody = string(b)
+				} else {
+					requestBody = string(formatted)
+				}
 				c.Request().Body = io.NopCloser(bytes.NewBuffer(b))
 			}
 			host := c.Request().Host

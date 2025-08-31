@@ -9,6 +9,12 @@ type StackError struct {
 	extraErrs []error // 额外的 error
 }
 
+// AppendErrors 追加额外的 error 信息
+func (c *StackError) AppendErrors(extras ...error) *StackError {
+	c.extraErrs = append(c.extraErrs, extras...)
+	return c
+}
+
 // 实现系统自带的 error 接口
 func (c *StackError) Error() string {
 	return c.err.Error()
@@ -21,6 +27,9 @@ func (c *StackError) Code() int {
 
 // Msg 获取错误信息
 func (c *StackError) Msg() string {
+	if c.extraErrs != nil && len(c.extraErrs) > 0 {
+		return c.ToStrByExtra()
+	}
 	return c.err.Error()
 }
 

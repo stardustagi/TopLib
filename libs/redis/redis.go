@@ -8,6 +8,8 @@ import (
 
 const Nil = redis.Nil
 
+type PubSub = redis.PubSub
+
 type RedisCli interface {
 	KeyPrefix() string
 

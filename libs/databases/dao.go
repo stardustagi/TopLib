@@ -18,9 +18,9 @@ type Dao interface {
 	UpdateById(id interface{}, bean interface{}) (int64, error)
 
 	// 新增的 Upsert 方法
-	Upsert(bean interface{}) (int64, error)
+	Upsert(where interface{}, bean interface{}) (int64, error)
 	UpsertById(id interface{}, bean interface{}) (int64, error)
-	UpsertMany(beans ...interface{}) (int64, error)
+	UpsertMany(where interface{}, beans ...interface{}) (int64, error)
 
 	Delete(bean interface{}) (int64, error)
 	DeleteById(id interface{}, bean interface{}) (int64, error)
@@ -119,16 +119,16 @@ func (m *OrmBaseDao) UpdateById(id interface{}, bean interface{}) (int64, error)
 }
 
 // Upsert 如果数据存在则更新，不存在则插入
-func (m *OrmBaseDao) Upsert(bean interface{}) (int64, error) {
+func (m *OrmBaseDao) Upsert(where interface{}, bean interface{}) (int64, error) {
 	// 检查数据是否存在
-	exists, err := m.Exists(bean)
+	exists, err := m.Exists(where)
 	if err != nil {
 		return 0, err
 	}
 
 	if exists {
 		// 数据存在，执行更新
-		return m.Update(bean)
+		return m.Update(bean, where)
 	} else {
 		// 数据不存在，执行插入
 		return m.InsertOne(bean)
@@ -153,11 +153,11 @@ func (m *OrmBaseDao) UpsertById(id interface{}, bean interface{}) (int64, error)
 }
 
 // UpsertMany 批量Upsert操作
-func (m *OrmBaseDao) UpsertMany(beans ...interface{}) (int64, error) {
+func (m *OrmBaseDao) UpsertMany(where interface{}, beans ...interface{}) (int64, error) {
 	var totalAffected int64 = 0
 
 	for _, bean := range beans {
-		affected, err := m.Upsert(bean)
+		affected, err := m.Upsert(where, bean)
 		if err != nil {
 			return totalAffected, err
 		}

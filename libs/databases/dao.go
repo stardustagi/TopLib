@@ -2,6 +2,7 @@ package databases
 
 import (
 	"errors"
+	"fmt"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/migrate"
@@ -20,7 +21,7 @@ type Dao interface {
 	// 新增的 Upsert 方法
 	Upsert(where interface{}, bean interface{}) (int64, error)
 	UpsertById(id interface{}, bean interface{}) (int64, error)
-	UpsertMany(where interface{}, beans ...interface{}) (int64, error)
+	UpsertMany(wheres []interface{}, beans []interface{}) (int64, error)
 
 	Delete(bean interface{}) (int64, error)
 	DeleteById(id interface{}, bean interface{}) (int64, error)
@@ -153,11 +154,15 @@ func (m *OrmBaseDao) UpsertById(id interface{}, bean interface{}) (int64, error)
 }
 
 // UpsertMany 批量Upsert操作
-func (m *OrmBaseDao) UpsertMany(where interface{}, beans ...interface{}) (int64, error) {
+func (m *OrmBaseDao) UpsertMany(wheres []interface{}, beans []interface{}) (int64, error) {
+	if len(wheres) != len(beans) {
+		return 0, fmt.Errorf("wheres 和 beans 长度不一致")
+	}
+
 	var totalAffected int64 = 0
 
-	for _, bean := range beans {
-		affected, err := m.Upsert(where, bean)
+	for i, bean := range beans {
+		affected, err := m.Upsert(wheres[i], bean)
 		if err != nil {
 			return totalAffected, err
 		}

@@ -34,6 +34,7 @@ type Dao interface {
 		pageable Pageable, condiBean ...interface{}) (int64, error)
 
 	Query(rowsSlicePtr interface{}, sql string, Args ...interface{}) error
+	CallProcedure(procName string, args ...interface{}) ([]map[string]interface{}, error)
 	Native() DBInterface
 	Migrations(opt *migrate.Options, tables []map[string]interface{}) error
 }
@@ -315,4 +316,62 @@ func (m *OrmBaseDao) GetTableMetas(tableName string) ([]map[string]interface{}, 
 		return nil, errors.New("table not found")
 	}
 	return tableMetas.([]map[string]interface{}), nil
+}
+
+func (m *OrmBaseDao) CallProcedure(procName string, args ...interface{}) ([]map[string]interface{}, error) {
+	// 构建存储过程调用的 SQL 语句
+	placeholders := ""
+	for i := range args {
+		if i > 0 {
+			placeholders += ", "
+		}
+		placeholders += "?"
+	}
+	sql := fmt.Sprintf("CALL %s(%s)", procName, placeholders)
+
+	// 执行存储过程
+	rows, err := m.session.DB().Query(sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var results []map[string]interface{}
+
+	for rows.Next() {
+		// 获取列名
+		columns, err := rows.Columns()
+		if err != nil {
+			return nil, err
+		}
+
+		// 创建一个切片来保存每一行的列值
+		values := make([]interface{}, len(columns))
+		valuePtrs := make([]interface{}, len(columns))
+		for i := range columns {
+			valuePtrs[i] = &values[i]
+		}
+
+		// 扫描当前行的列值到切片中
+		if err := rows.Scan(valuePtrs...); err != nil {
+			return nil, err
+		}
+
+		// 创建一个映射来保存列名和对应的值
+		rowMap := make(map[string]interface{})
+		for i, col := range columns {
+			var v interface{}
+			val := values[i]
+			b, ok := val.([]byte)
+			if ok {
+				v = string(b)
+			} else {
+				v = val
+			}
+			rowMap[col] = v
+		}
+
+		results = append(results, rowMap)
+	}
+
+	return results, nil
 }

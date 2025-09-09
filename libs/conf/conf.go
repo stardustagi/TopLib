@@ -41,19 +41,6 @@ func Init() {
 	os.Setenv("APP_NAME", appName)
 	os.Setenv("APP_VERSION", appVersion)
 	os.Setenv("REDIS_KEY_PREFIX", redisKeyPrefix)
-
-	// 设置webservice 运行参数
-	webSrv := config["websrv"].(map[string]interface{})
-	port, ok := webSrv["port"].(string)
-	if !ok {
-		port = "10001"
-	}
-	host, ok := webSrv["host"].(string)
-	if !ok {
-		host = "127.0.0.1"
-	}
-	os.Setenv("WEB_PORT", port)
-	os.Setenv("WEB_HOST", host)
 }
 
 func Get(key string) []byte {

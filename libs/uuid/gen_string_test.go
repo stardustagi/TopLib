@@ -21,3 +21,9 @@ func TestGenDateRnString(t *testing.T) {
 	fmt.Println(result)
 	t.Log(result)
 }
+
+func TestUUid(t *testing.T) {
+	uuid := GetUuidString()
+	fmt.Println(uuid)
+	t.Log(uuid)
+}

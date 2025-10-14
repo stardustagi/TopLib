@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -78,11 +82,11 @@ func (m *HttpServer) Startup() error {
 		m.logger.Info("http route registered:", logs.String("method", route.Method), logs.String("path", route.Path))
 	}
 	m.Engine().Start(m.addr)
-	go func() {
-		<-m.ctx.Done()
-		m.Stop()
-		m.engine.Close()
-	}()
+	//go func() {
+	//	<-m.ctx.Done()
+	//	m.Stop()
+	//	m.engine.Close()
+	//}()
 	return nil
 }
 
@@ -91,6 +95,70 @@ func (m *HttpServer) Stop() {
 		m.logger.Error("shutdown http server:", zap.Error(err))
 		return
 	}
+}
+
+// StartWithGracefulShutdown 启动服务器并监听信号量进行优雅关闭
+func (m *HttpServer) StartWithGracefulShutdown() error {
+	// 启动服务器
+	go func() {
+		m.logger.Info("http server starting on:", zap.String("addr", m.addr))
+		// 打印路由
+		for _, route := range m.engine.Routes() {
+			m.logger.Info("http route registered:", logs.String("method", route.Method), logs.String("path", route.Path))
+		}
+
+		if err := m.engine.Start(m.addr); err != nil && errors.Is(err, http.ErrServerClosed) {
+			m.logger.Fatal("failed to start server:", zap.Error(err))
+		}
+	}()
+
+	// 等待信号量进行优雅关闭
+	return m.WaitForShutdown()
+}
+
+// WaitForShutdown 等待关闭信号并执行优雅关闭
+func (m *HttpServer) WaitForShutdown() error {
+	// 创建信号通道
+	quit := make(chan os.Signal, 1)
+
+	// 监听指定的信号量：SIGINT (Ctrl+C), SIGTERM
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// 等待信号
+	sig := <-quit
+	m.logger.Info("received shutdown signal:", zap.String("signal", sig.String()))
+
+	// 创建带超时的上下文用于优雅关闭
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	m.logger.Info("shutting down server...")
+
+	// 执行优雅关闭
+	if err := m.engine.Shutdown(ctx); err != nil {
+		m.logger.Error("server forced to shutdown:", zap.Error(err))
+		return err
+	}
+
+	m.logger.Info("server exited gracefully")
+	return nil
+}
+
+// GracefulStop 手动触发优雅关闭（可用于程序内部调用）
+func (m *HttpServer) GracefulStop() error {
+	m.logger.Info("gracefully stopping server...")
+
+	// 创建带超时的上下文用于优雅关闭
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := m.engine.Shutdown(ctx); err != nil {
+		m.logger.Error("server forced to shutdown:", zap.Error(err))
+		return err
+	}
+
+	m.logger.Info("server stopped gracefully")
+	return nil
 }
 
 // Handle registers a new route with the HTTP server.

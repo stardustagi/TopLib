@@ -36,9 +36,36 @@ type BaseService struct {
 	isRun  bool
 }
 
-func (bs *BaseService) Stop() {}
+// Init 初始化基础服务
+func (bs *BaseService) Init(config ...interface{}) {
+	bs.isRun = false
+}
 
-func (bs *BaseService) Start() {}
+// Start 启动服务
+func (bs *BaseService) Start() {
+	if bs.isRun {
+		return
+	}
+	bs.ctx, bs.cancel = context.WithCancel(context.Background())
+	bs.isRun = true
+	if bs.logger != nil {
+		bs.logger.Info("BaseService started")
+	}
+}
+
+// Stop 优雅关闭服务
+func (bs *BaseService) Stop() {
+	if !bs.isRun {
+		return
+	}
+	if bs.cancel != nil {
+		bs.cancel()
+	}
+	bs.isRun = false
+	if bs.logger != nil {
+		bs.logger.Info("BaseService stopped")
+	}
+}
 
 func (bs *BaseService) IsRunning() bool { return bs.isRun }
 
@@ -50,19 +77,12 @@ type HttpService struct {
 }
 
 func (h *HttpService) Init(config ...interface{}) {
+	h.BaseService.Init(config...)
 	if len(config) > 0 {
 		if v, ok := config[0].(string); ok {
 			h.config = v
 		}
 	}
-}
-
-func (h *HttpService) Start() {
-	h.isRun = true
-}
-
-func (h *HttpService) Stop() {
-	h.isRun = false
 }
 
 // QueueService 实现
@@ -73,19 +93,12 @@ type QueueService struct {
 }
 
 func (q *QueueService) Init(config ...interface{}) {
+	q.BaseService.Init(config...)
 	if len(config) > 0 {
 		if v, ok := config[0].(string); ok {
 			q.queueName = v
 		}
 	}
-}
-
-func (q *QueueService) Start() {
-	q.isRun = true
-}
-
-func (q *QueueService) Stop() {
-	q.isRun = false
 }
 
 // ServiceFactory 工厂方法

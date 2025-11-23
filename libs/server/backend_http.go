@@ -58,6 +58,8 @@ func (m *Backend) Start() error {
 }
 
 func (m *Backend) Stop() {
-	//m.httpServer.Stop()
-	m.httpServer.WaitForShutdown()
+	err := m.httpServer.WaitForShutdown()
+	if err != nil {
+		m.Logger.Error("HTTP server shutdown error", zap.Error(err))
+	}
 }

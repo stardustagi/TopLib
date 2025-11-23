@@ -27,7 +27,7 @@ type HttpServer struct {
 	group  map[string]*StarDustGroup
 }
 
-// @title StarDust HTTP Server
+// NewHttpServer @title StarDust HTTP Server
 // @version 1.0
 // @description This is the HTTP server for StarDust backend.
 // @host localhost:8080
@@ -39,7 +39,7 @@ func NewHttpServer(configByte []byte) (*HttpServer, error) {
 		panic("Failed to parse HTTP server configuration: " + err.Error())
 	}
 	engine.Validator = &CustomValidator{Validator: validator.New()}
-	engine.Use()
+	//engine.Use()
 	addr := fmt.Sprintf("%s:%d", config.Address, config.Port)
 	if config.Cors {
 		engine.Use(Cors())
@@ -81,12 +81,11 @@ func (m *HttpServer) Startup() error {
 	for _, route := range m.engine.Routes() {
 		m.logger.Info("http route registered:", logs.String("method", route.Method), logs.String("path", route.Path))
 	}
-	m.Engine().Start(m.addr)
-	//go func() {
-	//	<-m.ctx.Done()
-	//	m.Stop()
-	//	m.engine.Close()
-	//}()
+	err := m.Engine().Start(m.addr)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		m.logger.Fatal("failed to start server:", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
@@ -175,9 +174,9 @@ func (m *HttpServer) Internal(method string, path string, handler IHandler) {
 }
 
 func (m *HttpServer) AddGroup(path string, middleware ...echo.MiddlewareFunc) {
-	url_path, _ := url.JoinPath(m.path, "api", path)
-	m.group[path] = NewStarDustGroup(path, m.engine.Group(url_path, middleware...))
-	m.logger.Info("http group registered:", logs.String("path", url_path))
+	urlPath, _ := url.JoinPath(m.path, "api", path)
+	m.group[path] = NewStarDustGroup(path, m.engine.Group(urlPath, middleware...))
+	m.logger.Info("http group registered:", logs.String("path", urlPath))
 }
 
 func (m *HttpServer) Get(path string, group string, handler IHandler) {

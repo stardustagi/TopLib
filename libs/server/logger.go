@@ -55,7 +55,11 @@ func Request() echo.MiddlewareFunc {
 			status := c.Response().Status
 			ip := echo.ExtractIPFromXFFHeader()(c.Request())
 			logs.Info(fmt.Sprintf("request :'%s %s' %d %s '-' '%s' %s '%s'", method, uri, status, ip, agent, host, requestBody))
-			next(c)
+			err = next(c)
+			if err != nil {
+				logs.Errorf("handler error: %v", err)
+				return err
+			}
 			logs.Infof(fmt.Sprintf("response: '%s'", respBody.String()))
 			return nil
 		}

@@ -54,7 +54,6 @@ func (m *Backend) AddNativeHandler(method string, path string, handler echo.Hand
 }
 
 func (m *Backend) Start() error {
-	//return m.httpServer.StartWithGracefulShutdown()
 	return m.httpServer.Startup()
 }
 
